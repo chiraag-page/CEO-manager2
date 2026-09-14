@@ -1,0 +1,604 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEO Office Dashboard</title>
+    <style>
+        :root {
+            --primary: #1e293b;
+            --secondary: #0f172a;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #0ea5e9;
+            --purple: #8b5cf6;
+            --inactive-gray: #cbd5e1;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 10px;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        @media (min-width: 640px) {
+            header {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px 30px;
+            }
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        @media (min-width: 640px) {
+            h1 {
+                font-size: 24px;
+            }
+        }
+
+        .date-display {
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        /* Status Bar Section */
+        .status-card {
+            background: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        @media (min-width: 768px) {
+            .status-card {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                padding: 20px 30px;
+            }
+        }
+
+        .status-indicators {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        @media (min-width: 640px) {
+            .status-indicators {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+        }
+
+        .status-btn {
+            padding: 10px 14px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: white;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        /* Inactive buttons look gray */
+        .status-btn.inactive {
+            background-color: var(--inactive-gray) !important;
+            color: #475569 !important;
+            opacity: 0.8;
+        }
+
+        /* Active color styles */
+        .status-available.active { background-color: var(--success); }
+        .status-meeting.active { background-color: var(--warning); }
+        .status-phone.active { background-color: var(--info); }
+        .status-site.active { background-color: var(--purple); }
+
+        .status-btn.active {
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.15);
+            transform: scale(1.02);
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .card {
+                padding: 25px;
+            }
+        }
+
+        .card h2 {
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        @media (min-width: 640px) {
+            .card h2 {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 18px;
+            }
+        }
+
+        /* Form Styles */
+        .form-container {
+            display: none; /* Hidden by default */
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .form-container.show {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 70px;
+        }
+
+        button.btn-primary {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button.btn-primary:hover {
+            background-color: #2563eb;
+        }
+
+        button.btn-primary:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        .btn-toggle-form {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        /* Table Styles */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13px;
+            min-width: 600px;
+        }
+
+        @media (min-width: 768px) {
+            table {
+                font-size: 14px;
+            }
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #f1f5f9;
+            color: var(--primary);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .priority-low { background-color: var(--success); }
+        .priority-medium { background-color: var(--warning); }
+        .priority-high { background-color: var(--danger); }
+
+        .btn-sm {
+            padding: 5px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-remark { background-color: var(--accent); color: white; }
+        .btn-print { background-color: var(--primary); color: white;}
+
+        /* Print formatting */
+        @media print {
+            body {
+                background: white;
+                color: black;
+                padding: 0;
+            }
+            header, .status-card, .no-print {
+                display: none !important;
+            }
+            .card {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+            }
+            table {
+                border: 1px solid #000;
+                min-width: 100%;
+            }
+            th, td {
+                border: 1px solid #000;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🏢 CEO Office Dashboard</h1>
+        <div class="date-display" id="currentDateDisplay"></div>
+    </header>
+
+    <!-- Status Bar -->
+    <div class="status-card">
+        <div>
+            <h3 style="font-size: 15px; margin-bottom: 3px;">CEO Current Status</h3>
+            <p id="currentStatusText" style="font-weight: 600; color: var(--success);">Available</p>
+        </div>
+        <div class="status-indicators">
+            <button class="status-btn status-available" id="btn-Available" onclick="setCeoStatus('Available', 'var(--success)')">Available</button>
+            <button class="status-btn status-meeting" id="btn-Busy in Meeting" onclick="setCeoStatus('Busy in Meeting', 'var(--warning)')">Busy in Meeting</button>
+            <button class="status-btn status-phone" id="btn-On Phone Call" onclick="setCeoStatus('On Phone Call', 'var(--info)')">On Phone Call</button>
+            <button class="status-btn status-site" id="btn-On Site Visit" onclick="setCeoStatus('On Site Visit', 'var(--purple)')">On Site Visit</button>
+        </div>
+    </div>
+
+    <!-- Appointments List & Summary Column (Top Section) -->
+    <div class="card">
+        <h2>
+            <span>Today's Appointments & Tasks <span id="capacityCount" style="font-size: 14px; font-weight: normal; color: #64748b;">(0 / 15)</span></span>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button class="btn-sm btn-print no-print" onclick="window.print()">Print Summary</button>
+                <button class="btn-toggle-form no-print" id="toggleFormBtn" onclick="toggleBookingForm()">+ Book New Appointment</button>
+            </div>
+        </h2>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Name</th>
+                        <th>Subject</th>
+                        <th>Priority</th>
+                        <th>Remarks & Review</th>
+                        <th class="no-print">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="appointmentTableBody">
+                    <!-- Dynamic rows injected here -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Booking Form Section (Placed Below Table, Collapsible) -->
+        <div class="form-container no-print" id="bookingFormContainer">
+            <h3 style="font-size: 15px; margin-bottom: 15px; color: var(--primary);">Schedule an Appointment</h3>
+            <form id="appointmentForm" onsubmit="bookAppointment(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="visitorName">Visitor Name</label>
+                        <input type="text" id="visitorName" required placeholder="Enter full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="appointmentTime">Available Time Slot</label>
+                        <input type="time" id="appointmentTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject / Purpose</label>
+                        <input type="text" id="subject" required placeholder="Brief agenda">
+                    </div>
+                    <div class="form-group">
+                        <label for="priority">Priority</label>
+                        <select id="priority" required>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <button type="submit" id="submitBtn" class="btn-primary">Confirm Booking</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const STORAGE_KEY_DATE = "ceo_dashboard_date";
+    const STORAGE_KEY_APPOINTMENTS = "ceo_dashboard_appointments";
+    const STORAGE_KEY_STATUS = "ceo_dashboard_status";
+    const MAX_CAPACITY = 15;
+
+    function initDashboard() {
+        checkDailyReset();
+        displayCurrentDate();
+        loadStatus();
+        renderAppointments();
+    }
+
+    function displayCurrentDate() {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('currentDateDisplay').innerText = new Date().toLocaleDateString(undefined, options);
+    }
+
+    function checkDailyReset() {
+        const todayDateStr = new Date().toDateString();
+        const savedDate = localStorage.getItem(STORAGE_KEY_DATE);
+
+        if (savedDate !== todayDateStr) {
+            localStorage.setItem(STORAGE_KEY_DATE, todayDateStr);
+            localStorage.setItem(STORAGE_KEY_APPOINTMENTS, JSON.stringify([]));
+            localStorage.setItem(STORAGE_KEY_STATUS, JSON.stringify({ text: 'Available', color: 'var(--success)' }));
+        }
+    }
+
+    // Toggle Form visibility
+    function toggleBookingForm() {
+        const formContainer = document.getElementById('bookingFormContainer');
+        const btn = document.getElementById('toggleFormBtn');
+        formContainer.classList.toggle('show');
+        if (formContainer.classList.contains('show')) {
+            btn.innerText = "- Close Form";
+            btn.style.backgroundColor = "var(--danger)";
+        } else {
+            btn.innerText = "+ Book New Appointment";
+            btn.style.backgroundColor = "var(--success)";
+        }
+    }
+
+    // CEO Status Management (Selected lights up, others turn gray)
+    function setCeoStatus(statusText, colorCode) {
+        const statusData = { text: statusText, color: colorCode };
+        localStorage.setItem(STORAGE_KEY_STATUS, JSON.stringify(statusData));
+        loadStatus();
+    }
+
+    function loadStatus() {
+        const savedStatus = JSON.parse(localStorage.getItem(STORAGE_KEY_STATUS));
+        if (savedStatus) {
+            const statusTextEl = document.getElementById('currentStatusText');
+            statusTextEl.innerText = savedStatus.text;
+            statusTextEl.style.color = savedStatus.color;
+
+            // Handle active/inactive button styles
+            const statusNames = ['Available', 'Busy in Meeting', 'On Phone Call', 'On Site Visit'];
+            statusNames.forEach(name => {
+                const btn = document.getElementById(`btn-${name}`);
+                if (name === savedStatus.text) {
+                    btn.classList.add('active');
+                    btn.classList.remove('inactive');
+                } else {
+                    btn.classList.remove('active');
+                    btn.classList.add('inactive');
+                }
+            });
+        }
+    }
+
+    function bookAppointment(event) {
+        event.preventDefault();
+        
+        let appointments = JSON.parse(localStorage.getItem(STORAGE_KEY_APPOINTMENTS)) || [];
+
+        if (appointments.length >= MAX_CAPACITY) {
+            alert("Maximum daily appointment capacity (15) reached!");
+            return;
+        }
+
+        const name = document.getElementById('visitorName').value;
+        const time = document.getElementById('appointmentTime').value;
+        const subject = document.getElementById('subject').value;
+        const priority = document.getElementById('priority').value;
+
+        const newAppointment = {
+            id: Date.now(),
+            time,
+            name,
+            subject,
+            priority,
+            remark: ""
+        };
+
+        appointments.push(newAppointment);
+        appointments.sort((a, b) => a.time.localeCompare(b.time));
+
+        localStorage.setItem(STORAGE_KEY_APPOINTMENTS, JSON.stringify(appointments));
+
+        document.getElementById('appointmentForm').reset();
+        toggleBookingForm(); // Close form after booking
+        renderAppointments();
+    }
+
+    function updateRemark(id) {
+        let appointments = JSON.parse(localStorage.getItem(STORAGE_KEY_APPOINTMENTS)) || [];
+        const appt = appointments.find(a => a.id === id);
+        if (!appt) return;
+
+        const currentRemark = appt.remark || "";
+        const newRemark = prompt(`Enter review/remark for ${appt.name}:`, currentRemark);
+        
+        if (newRemark !== null) {
+            appt.remark = newRemark;
+            localStorage.setItem(STORAGE_KEY_APPOINTMENTS, JSON.stringify(appointments));
+            renderAppointments();
+        }
+    }
+
+    function renderAppointments() {
+        const appointments = JSON.parse(localStorage.getItem(STORAGE_KEY_APPOINTMENTS)) || [];
+        const tbody = document.getElementById('appointmentTableBody');
+        const capacityCount = document.getElementById('capacityCount');
+        const submitBtn = document.getElementById('submitBtn');
+
+        tbody.innerHTML = '';
+        capacityCount.innerText = `(${appointments.length} / ${MAX_CAPACITY})`;
+
+        if (appointments.length >= MAX_CAPACITY) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Daily Capacity Full (15/15)";
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Confirm Booking";
+        }
+
+        if (appointments.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #64748b; padding: 20px;">No appointments booked for today.</td></tr>`;
+            return;
+        }
+
+        appointments.forEach(app => {
+            let badgeClass = 'priority-low';
+            if (app.priority === 'Medium') badgeClass = 'priority-medium';
+            if (app.priority === 'High') badgeClass = 'priority-high';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${app.time}</strong></td>
+                <td>${escapeHtml(app.name)}</td>
+                <td>${escapeHtml(app.subject)}</td>
+                <td><span class="badge ${badgeClass}">${app.priority}</span></td>
+                <td>${app.remark ? escapeHtml(app.remark) : '<span style="color:#94a3b8; font-style:italic;">No remarks yet</span>'}</td>
+                <td class="no-print">
+                    <button class="btn-sm btn-remark" onclick="updateRemark(${app.id})">Remark</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    window.onload = initDashboard;
+</script>
+
+</body>
+</html>
+
